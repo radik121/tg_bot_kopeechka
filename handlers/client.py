@@ -144,15 +144,17 @@ async def input_email(message: types.Message, state: FSMContext):
     print(data1)
 
 
-async def background_on_action(token, task_id, message, code_or_msg) -> None:
-    """background task which is created when user asked"""
+async def process_get_code(message: types.Message, state: FSMContext):
+    """Отправляем запрос на сайт копеечки и получаем код"""
 
-    await asyncio.sleep(8)
-    response = mailbox_message(full='0', id=task_id, token=token)
+    await message.answer("Сейчас получим код...Время ожидания составит около 3 мин.")
+    await asyncio.sleep(140)
+    data = await state.get_data()
+    response = mailbox_message(token=data['api'], full='1', id=data['task_id'])
     print(response)
     match response['status']:
         case 'OK':
-            match code_or_msg:
+            match data['code_or_text']:
                 case 'КОД':
                     message_email = parse_facebook(response['fullmessage'])
                 case 'Сообщение':
@@ -165,19 +167,6 @@ async def background_on_action(token, task_id, message, code_or_msg) -> None:
                 "Вы не отправили письмо или оно еще не пришло. Отправьте его повторно или нажмите <b>'Код отправлен'</b>",
                 reply_markup=send_code
             )
-
-
-async def process_get_code(message: types.Message, state: FSMContext):
-    """Отправляем запрос на сайт копеечки и получаем код"""
-
-    await message.answer("Сейчас получим код")
-    data = await state.get_data()
-    asyncio.create_task(background_on_action(
-        token=data['api'],
-        task_id=data['task_id'],
-        message=message,
-        code_or_msg=data['code_or_text']
-    ))
 
 
 def register_client():
