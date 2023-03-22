@@ -1,6 +1,11 @@
 import re
-from kopeechka import Mail_activations
-from conf import KP_API
+from kopeechka import MailActivations
+from kopeechka.errors import (
+    BAD_TOKEN, WAIT_LINK,
+    NO_ACTIVATION, ACTIVATION_CANCELED, 
+    ACTIVATION_NOT_FOUND, BAD_EMAIL,
+    SYSTEM_ERROR
+    )
 
 
 def check(email: str):
@@ -15,21 +20,38 @@ def check(email: str):
 def parse_facebook(text: str) -> str:
     """Парсинг письма с Facebook"""
 
-    result = re.findall(r'code: \d+', text)
+    result = re.findall(r'код: \d+|code: \d+', text)
+    print(result)
     return result[0]
 
 
-def mailbox_reorder(token, site, email, api='2.0') -> dict:
+def mailbox_reorder(token, site, email) -> dict:
     """Повторный запрос активации с этой почтой на kopeechka"""
 
-    body = Mail_activations(token=token)
-    return body.mailbox_reorder(site, email, api)
+    body = MailActivations(token=token)
+    try:
+        res = body.mailbox_reorder(site=site, email=email)
+        return res.data
+    except (BAD_TOKEN, WAIT_LINK,
+            NO_ACTIVATION, ACTIVATION_CANCELED, 
+            ACTIVATION_NOT_FOUND, BAD_EMAIL,
+            SYSTEM_ERROR 
+            ) as e:
+        return {'status': 'ERROR', 'value': e}
 
 
-def mailbox_message(token, full, id, api='2.0') -> str:
+def mailbox_message(token, full, id) -> str:
 
-    body = Mail_activations(token=token)
-    return body.mailbox_get_message(full, id, api)
+    body = MailActivations(token=token)
+    try:
+        res = body.mailbox_get_message(full=full, id=id)
+        return res.data
+    except (BAD_TOKEN, WAIT_LINK,
+            NO_ACTIVATION, ACTIVATION_CANCELED, 
+            ACTIVATION_NOT_FOUND, BAD_EMAIL,
+            SYSTEM_ERROR 
+            ) as e:
+        return {'status': 'ERROR', 'value': e}
     
 
 # print(mailbox_reorder(KP_API, site='facebook.com', email='oxelomymy1981@miqkole.store'))

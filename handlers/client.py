@@ -88,8 +88,8 @@ async def select_api(message: types.Message, state: FSMContext):
             await state.set_state(Form.you_api)
             await message.answer('Введите ваш API', reply_markup=back)
     await state.update_data(site = 'facebook.com')
-    data = await state.get_data()
-    print(data)
+    # data = await state.get_data()
+    # print(data)
 
 
 async def input_api(message: types.Message, state: FSMContext):
@@ -103,8 +103,8 @@ async def input_api(message: types.Message, state: FSMContext):
             await state.update_data(api = message.text)
             await state.set_state(Form.email)
             await message.answer('Введите email аккаунта', reply_markup=back)
-    data = await state.get_data()
-    print(data)
+    # data = await state.get_data()
+    # print(data)
         
 
 async def input_email(message: types.Message, state: FSMContext):
@@ -119,8 +119,9 @@ async def input_email(message: types.Message, state: FSMContext):
             await message.answer("Сейчас активируем почту...")
 
             data = await state.get_data()
+            # print(data)
             response = mailbox_reorder(data['api'], data['site'], data['email'])
-            print(response)
+            print('mailbox_reorder:', response['status'])
 
             match response['status']:
                 case 'OK':
@@ -140,23 +141,23 @@ async def input_email(message: types.Message, state: FSMContext):
         case _:
             await message.answer('Это не похоже на email адрес!')
             await message.answer('Введите email аккаунта', reply_markup=back)
-    data1 = await state.get_data()
-    print(data1)
+    # data1 = await state.get_data()
+    # print(data1)
 
 
 async def process_get_code(message: types.Message, state: FSMContext):
     """Отправляем запрос на сайт копеечки и получаем код"""
 
-    await message.answer("Сейчас получим код...Время ожидания составит около 3 мин.")
-    await asyncio.sleep(140)
+    await message.answer("Сейчас получим код...Время ожидания составит около 1 мин.")
+    await asyncio.sleep(60)
     data = await state.get_data()
     response = mailbox_message(token=data['api'], full='1', id=data['task_id'])
-    print(response)
+    print(f"mailbox_message: {response['status']} - {response['value']}")
     match response['status']:
         case 'OK':
             match data['code_or_text']:
                 case 'КОД':
-                    message_email = parse_facebook(response['fullmessage'])
+                    message_email = parse_facebook(str(response['fullmessage']))
                 case 'Сообщение':
                     message_email = response['fullmessage']        
             await bot.send_message(message.from_user.id, message_email, reply_markup=start_menu)
