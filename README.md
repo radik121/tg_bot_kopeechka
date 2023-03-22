@@ -21,8 +21,12 @@ git clone https://github.com/radik121/tg_bot_kopeechka.git
 ```bash
 cd tg_bot_kopeechka
 ```
+3. Переименовать .env_rename в .env, и добваить в него токкены API.
+```bash
+mv .env_rename .env
+```
 
-3. Для запуска проекта выполнить команду:
+4. Для запуска проекта выполнить команду:
 ```bash
 docker-compose up -d --build
 ```
