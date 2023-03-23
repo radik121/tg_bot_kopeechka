@@ -157,7 +157,8 @@ async def process_get_code(message: types.Message, state: FSMContext):
         case 'OK':
             match data['code_or_text']:
                 case 'КОД':
-                    message_email = parse_facebook(str(response['fullmessage']))
+                    # message_email = parse_facebook(str(response['fullmessage']))
+                    message_email = response['value']
                 case 'Сообщение':
                     message_email = response['fullmessage']        
             await bot.send_message(message.from_user.id, message_email, reply_markup=start_menu)

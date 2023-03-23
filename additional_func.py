@@ -20,10 +20,10 @@ def check(email: str):
 def parse_facebook(text: str) -> str:
     """Парсинг письма с Facebook"""
 
-    result = re.findall(r'код: \d+|code: \d+', text)
-    print(result)
-    return result[0]
-
+    # result = re.findall(r'код: \d+|code: \d+', text)
+    result = re.search(r'код:\s\d+|code:\s\d+', text, re.M|re.I)
+    print(result.group())
+    return result.group()
 
 def mailbox_reorder(token, site, email) -> dict:
     """Повторный запрос активации с этой почтой на kopeechka"""
